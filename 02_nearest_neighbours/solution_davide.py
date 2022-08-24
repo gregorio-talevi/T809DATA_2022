@@ -113,8 +113,8 @@ def knn_confusion_matrix(
     confusion_matrix= [[0,0,0],[0,0,0],[0,0,0]]
     for i in range(len(y_pred)):
         confusion_matrix[y_pred[i]][point_targets[i]]+=1
-    for line in confusion_matrix:
-        print ('  '.join(map(str, line)))
+    # for line in confusion_matrix:
+        # print ('  '.join(map(str, line)))
     return np.asmatrix(confusion_matrix)
 
 def best_k(
@@ -173,7 +173,7 @@ def weighted_vote(
         if (map[c] > max):
             max=map[c]
             pos=c
-    print(map)
+    # print(map)
     return pos
 
 def wknn(
@@ -244,9 +244,9 @@ def wknn_accuracy(
             cont+=1
     return cont/len(result)
 
-d, t, classes = load_iris()
-x, points = d[0,:], d[1:, :]
-x_target, point_targets = t[0], t[1:]
+# d, t, classes = load_iris()
+# x, points = d[0,:], d[1:, :]
+# x_target, point_targets = t[0], t[1:]
 
 #print(euclidian_distance(x, points[0]))
 #print(euclidian_distance(x, points[50]))

@@ -162,13 +162,13 @@ def weighted_vote(
     for t in range(targets.shape[0]):
         for i in range(len(classes)):
             if targets[t] == classes[i]:
-                weighted = 1/distances[t]  # TODO possibili divisioni per zero incontrate
+                weighted = 1/distances[t]
                 weighted_votes[i] += weighted
                 total_weights_sum += weighted
                 break
     for v in range(weighted_votes.shape[0]):
         if weighted_votes[v] != 0:
-            weighted_votes[v] /= total_weights_sum  # TODO possibili divisioni per zero incontrate
+            weighted_votes[v] /= total_weights_sum
     return np.argmax(weighted_votes)
 
 
@@ -228,57 +228,66 @@ def compare_knns(
     for k in range(1, points.shape[0]):
         accuracy[k-1] = knn_accuracy(points, targets, classes, k)
         w_accuracy[k-1] = wknn_accuracy(points, targets, classes, k)
-    plt.plot(range(0, len(targets), 1), accuracy)
-    plt.plot(range(0, len(targets), 1), w_accuracy)
+    plt.plot(range(0, len(targets)-1, 1), accuracy[:k])
+    plt.plot(range(0, len(targets)-1, 1), w_accuracy[:k])
     plt.show()
 
 
 # MAIN PART
 
 if __name__ == '__main__':
+    # Introduction
     # d, t, classes = load_iris()
-    # # plot_points(d, t)
+    # plot_points(d, t)
+    # Part 1.1
+    # d, t, classes = load_iris()
     # x, points = d[0, :], d[1:, :]
     # x_target, point_targets = t[0], t[1:]
-
     # print(euclidian_distance(x, points[0]) == 0.5385164807134502)
     # print(euclidian_distance(x, points[50]) == 3.6166282640050254)
+    # Part 1.2
     # print(euclidian_distances(x, points)[0] == 0.5385164807134502)
-    # print(k_nearest(x, points, 1)[0] == 16)
+    # Part 1.3
+    # print(k_nearest(x, points, 1) == [16])
+    # print(k_nearest(x, points, 3) == [16, 3, 38])
+    # Part 1.4
     # print(vote(np.array([0,0,1,2]), np.array([0,1,2])) == 0)
     # print(vote(np.array([1,1,1,1]), np.array([0,1])) == 1)
+    # Part 1.5
     # print(knn(x, points, point_targets, classes, 1) == 0)
     # print(knn(x, points, point_targets, classes, 5) == 0)
     # print(knn(x, points, point_targets, classes, 150) == 1)
-
-    d, t, classes = load_iris()
-    (d_train, t_train), (d_test, t_test) = split_train_test(d, t, train_ratio=0.8)
-    # print(d_train)
-    # print(t_train)
-    # print(d_test)
-    # print(t_test)
-    # print(classes)
-
-    # print(knn_predict(d_test, t_test, classes, 10)) # [2 2 2 2 0 1 0 1 1 0 1 2 1 2 2 0 1 0 2 1 1 1 1 1 2 0 1 1 1]
-    # print(knn_predict(d_test, t_test, classes, 5)) # [2 2 2 2 0 1 0 1 1 0 1 2 1 2 2 0 1 0 2 2 1 1 2 1 2 0 1 1 2]
+    # Part 2.1
+    # d, t, classes = load_iris()
+    # (d_train, t_train), (d_test, t_test) = split_train_test(d, t, train_ratio=0.8)
+    # print(knn_predict(d_test, t_test, classes, 10) == [2, 2, 2, 2, 0, 1, 0, 1, 1, 0, 1, 2, 1, 2, 2, 0, 1, 0, 2, 1, 1, 1, 1, 1, 2, 0, 1, 1, 1])
+    # print(knn_predict(d_test, t_test, classes, 5) == [2, 2, 2, 2, 0, 1, 0, 1, 1, 0, 1, 2, 1, 2, 2, 0, 1, 0, 2, 2, 1, 1, 2, 1, 2, 0, 1, 1, 2])
+    # Part 2.2
     # print(knn_accuracy(d_test, t_test, classes, 10) == 0.8275862068965517)
     # print(knn_accuracy(d_test, t_test, classes, 5) == 0.9310344827586207)
-    # print(knn_confusion_matrix(d_test, t_test, classes, 10)) # [[ 6.  0.  0.] [ 0. 10.  4.] [ 0.  1.  8.]]
-    # print(knn_confusion_matrix(d_test, t_test, classes, 20)) # [[ 0.  0.  0.] [ 6.  8.  1.] [ 0.  3. 11.]]
+    # Part 2.3
+    # print(knn_confusion_matrix(d_test, t_test, classes, 10) == [[6., 0., 0.], [0., 10., 4.], [0., 1., 8.]])
+    # print(knn_confusion_matrix(d_test, t_test, classes, 20) == [[0., 0., 0.], [6., 8., 1.], [0., 3., 11.]])
+    # Part 2.4
     # print(best_k(d_train, t_train, classes) == 9)
+    # Part 2.5
     # knn_plot_points(d, t, classes, 3)
-    compare_knns(d, t, classes)
+    # Independent Part
+    # compare_knns(d_test, t_test, classes)
+    ...
 
 
 '''
 ## Answer to the Independent Part question ##
 
-When we use a basic knn implementation, as k increases the classes that are more frequent in the dataset will have more
+In a 'basic' knn implementation, as k increases the classes that are more frequent in the dataset will have more
 "weight" in the predictions. Ultimately, when k is equal to the number of points in the dataset, every prediction will
-just output the class with the most points in the dataset. So this approach is very susceptible to the overall
-balance of the initial dataset.
+just output the class with the most points in the dataset and, consequently, its accuracy will be really low.
+In conclusion, this approach is very dependant on the balance of the initial dataset. 
 
-When we use a weighted knn implementation, instead, we give more weight the points that are actually near the new point
-presented. So, even if we have a lot of points belonging to a specific class X, but very distant from the new point,
-they will have a relatively weight in the final prediction, thus allowing for more coherent results. 
+In a weighted knn implementation, instead, the nearer a point is to the new point to evaluate the higher will be its
+'weight' in the prediction. So if the majority of the points we examine belong to a class A, but they are far from
+the new point we want to predict, the prediction will instead give a higher priority to the few nearest points,
+thus allowing for more coherent results with the different values of k (= the different values of k have a relative effect
+on the prediction).
 '''

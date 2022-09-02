@@ -19,15 +19,13 @@ def prior(targets: np.ndarray, classes: list) -> np.ndarray:
     '''
     samples_count = len(targets)
     class_probs = []
-
-    if samples_count != 0:  # TODO controllare bene!
+    if samples_count != 0:
         for c in classes:
             class_count = 0
             for t in targets:
                 if t == c:
                     class_count += 1
             class_probs.append(class_count / samples_count)
-
     return class_probs
 
 
@@ -112,7 +110,14 @@ def brute_best_split(
         # create the thresholds
         # for each list of values of a single feature pick the minimum and maximum values
         # and create num_tries linearly spaced values between them
-        thetas = np.linspace(features[i].min(), features[i].max(), num_tries)  # TODO rivedere
+        min = float("inf")
+        max = -float("inf")
+        for j in range(features.shape[0]):
+            if features[j][i] < min:
+                min = features[j][i]
+            if features[j][i] > max:
+                max = features[j][i]
+        thetas = np.linspace(min, max, num_tries+2)[1:-1]
         # iterate thresholds
         for theta in thetas:
             new_gini = total_gini_impurity(features, targets, classes, i, theta)
@@ -120,7 +125,6 @@ def brute_best_split(
                 best_gini = new_gini
                 best_dim = i
                 best_theta = theta
-
     return best_gini, best_dim, best_theta
 
 
@@ -137,7 +141,6 @@ class IrisTreeTrainer:
         be dedicated to training.
         '''
         (self.train_features, self.train_targets), (self.test_features, self.test_targets) = split_train_test(features, targets, train_ratio)
-
         self.classes = classes
         self.tree = DecisionTreeClassifier()
 
@@ -150,62 +153,63 @@ class IrisTreeTrainer:
     def plot(self):
         plot_tree(self.tree)
         plt.show()
-        # plt.savefig("2_3_1", format="png")
 
     def plot_progress(self):
         # Independent section
-        # Remove this method if you don't go for independent section.
-        tr_f, tr_t, ts_f, ts_t = self.train_features, self.train_targets, self.test_features, self.test_targets
-        accuracy_series = []  # np.zeros(len(self.test_targets))
-
+        tr_f, tr_t = self.train_features, self.train_targets
+        accuracy_series = []
         for i in range(1, len(self.train_targets)):
-            self.train_features, self.train_targets, self.test_features, self.test_targets = tr_f[:i], tr_t[:i], ts_f[:i], ts_t[:i]
+            self.train_features, self.train_targets = tr_f[:i], tr_t[:i]
             self.train()
-            # accuracy_series[i-1] = self.accuracy()
             accuracy_series.append(self.accuracy())
-
-        # accuracy_series.pop(0)  # TODO eliminare
-
-        plt.plot(range(0, len(self.train_targets), 1), accuracy_series)  # TODO una volta elimintato il pop sopra rimettere il range a partire da 1
+        plt.plot(range(0, len(self.train_features), 1), accuracy_series)
         plt.show()
 
     def guess(self):
         return self.tree.predict(self.test_features)
 
     def confusion_matrix(self):
-        confusion_matrix = np.zeros((len(classes),len(classes)))
+        confusion_matrix = np.zeros((len(self.classes),len(self.classes)))
         guesses = self.guess()
         for i in range(len(guesses)):
             if guesses[i] == self.test_targets[i]:
-                confusion_matrix[classes[guesses[i]]][guesses[i]] += 1
+                confusion_matrix[self.classes[guesses[i]]][guesses[i]] += 1
             else:
-            # elif guesses[i] != self.test_targets[i]:
-                confusion_matrix[classes[guesses[i]]][self.test_targets[i]] += 1
-
+                confusion_matrix[self.classes[guesses[i]]][self.test_targets[i]] += 1
         return confusion_matrix
 
 
 # MAIN PART
 
 if __name__ == '__main__':
-    features, targets, classes = load_iris()
-
-    print(brute_best_split(features, targets, classes, 30)) # TODO controllare bene! Non viene proprio il risultato del prof
-
-    tree = IrisTreeTrainer(features, targets)
-    tree.train()
-
-    # print(tree.accuracy())
-    # print(tree.guess())
-    # print(tree.confusion_matrix())
-    # tree.plot()
-    # ------------------
-
+    # Part 1.1
+    # print(prior([0,0,1],[0,1]) == [2/3, 1/3])
+    # print(prior([0, 2, 3, 3], [0, 1, 2, 3]) == [1/4, 0, 1/4, 2/4])
+    # Part 1.2
+    # features, targets, classes = load_iris()
+    # (f_1, t_1), (f_2, t_2) = split_data(features, targets, 2, 4.65)
+    # print(f_1.shape[0] == 90)
+    # print(f_2.shape[0] == 60)
+    # Part 1.3
+    # print(gini_impurity(t_1, classes) == 0.2517283950617284)
+    # print(gini_impurity(t_2, classes) == 0.1497222222222222)
+    # Part 1.4
+    # print(weighted_impurity(t_1, t_2, classes) == 0.2109259259259259)
+    # Part 1.5
+    # print(total_gini_impurity(features, targets, classes, 2, 4.65) == 0.2109259259259259)
+    # Part 1.6
+    # print(brute_best_split(features, targets, classes, 30) == (0.16666666666666666, 2, 1.9516129032258065))
+    # Part 2
+    # features, targets, classes = load_iris()
+    # dt = IrisTreeTrainer(features, targets, classes=classes)
+    # dt.train()
+    # print(f'The accuracy is: {dt.accuracy()}')
+    # dt.plot()
+    # print(f'I guessed: {dt.guess()}')
+    # print(f'The true targets are: {dt.test_targets}')
+    # print(dt.confusion_matrix())
+    # Independent Part
     # features, targets, classes = load_iris()
     # dt = IrisTreeTrainer(features, targets, classes=classes, train_ratio=0.6)
     # dt.plot_progress()
-
-    # ------------------
-    # self.train()
-    # self.tree.predict(self.test_features)
-
+    ...
